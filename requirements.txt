@@ -1,3 +1,7 @@
 python-imagesearch
 pywin32
 requests
+numpy
+opencv_python
+Pillow
+pytesseract
