@@ -1,0 +1,3 @@
+python-imagesearch
+pywin32
+requests
