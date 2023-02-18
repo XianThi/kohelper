@@ -4,6 +4,7 @@
 
 ##Install tesseract using the Windows installer available at: https://github.com/UB-Mannheim/tesseract/wiki
 
+## python_dir\Lib\site-packages\python_imagesearch\imagesearch.py add func
 
 ```
 def imagesearch_count_ex(image, precision=0.9):
