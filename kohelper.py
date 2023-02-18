@@ -85,8 +85,9 @@ class KoHelper:
         requests.get(url)
 
     def olen_var_mi(self)->None:
-        print("Parti ölüm kontrolü çalışıyor..")
+        
         while not self.disconnect:
+            print("Parti ölüm kontrolü çalışıyor..")
             dead_cnt = imagesearch_count_ex("./images/hpbar.png")
             if len(dead_cnt) > 0:
                 x_count_list = []
@@ -107,6 +108,7 @@ class KoHelper:
             if "Disconnected from server" in text:
                 self.disconnect = True
                 print("DC oldunuz.")
+                self.sendMessage("DC oldunuz. Lütfen karakteri oyuna sokup botu yeniden başlatın.")
             sleep(self.dc_time)
 
     def dc_olan_var_mi(self)->None:
