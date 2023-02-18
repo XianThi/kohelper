@@ -5,7 +5,7 @@
 ##Install tesseract using the Windows installer available at: https://github.com/UB-Mannheim/tesseract/wiki
 
 
->
+```
 def imagesearch_count_ex(image, precision=0.9):
         img_rgb = pyautogui.screenshot()
         if is_retina:
@@ -22,3 +22,4 @@ def imagesearch_count_ex(image, precision=0.9):
             count .append((pt[0], pt[1]))
         # cv2.imwrite('result.png', img_rgb) // Uncomment to write output image with boxes drawn around occurrences
         return count
+```
