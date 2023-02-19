@@ -6,11 +6,13 @@ import psutil
 import requests
 import pyautogui
 import base64
+import pythoncom
 
 def PC_Name():
     return f'{os.environ["COMPUTERNAME"]} - {os.environ["USERNAME"]}'
     
 def Uptime():
+    pythoncom.CoInitialize()
     wmiob = wmi.WMI()
     sdata = wmiob.Win32_PerfFormattedData_PerfOS_System()
     uptime = sdata[-1].SystemUpTime
