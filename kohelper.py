@@ -5,12 +5,13 @@ from time import sleep
 from PIL import ImageGrab
 import ocr
 import threading
+import json 
 
 class KoHelper:
     def __init__(self):
         self.found_window = False
         self.disconnect = False
-        self.chat_id = -644166565
+        self.chat_id = -864786044
         self.token = "6071564266:AAHjzBD5Wk3_Ot7AtAg7tcfCrrRpkks59TQ"
         self.api = "https://api.telegram.org/bot"
         self.getUpdates()
@@ -31,7 +32,7 @@ class KoHelper:
         while not self.found_window:
             print("  pencere bulunamadı tekrar deneniyor..")
             win32gui.EnumWindows(self.callback, None)
-            sleep(2)
+            sleep(1)
         print("\n[!] Pencere bulundu. Bot baslatılıyor lütfen pencereye geçiş yapınız.")
         sleep(2)
         
@@ -41,6 +42,7 @@ class KoHelper:
                 return input_type (input(message))
             except:
                 pass
+
     def getUpdates(self):
         print("\n[!!!] Lütfen kanalınızın ID'sini güncelleyiniz.\r\n")
         print("\n[!!!] KANAL LISTESI [!!!!]")
@@ -60,6 +62,7 @@ class KoHelper:
         screen_capture = ImageGrab.grab(bbox=(x,y,x+width,y+height))
         name: str = ocr.get_text_from_image(image=screen_capture)
         return name
+    
     def callback(self,hwnd, extra) -> None:  # pylint: disable=unused-argument
         """Function used to find the game window and get its size"""
         if "Knight OnLine Client" not in win32gui.GetWindowText(hwnd):
@@ -85,7 +88,6 @@ class KoHelper:
         requests.get(url)
 
     def olen_var_mi(self)->None:
-        
         while not self.disconnect:
             print("Parti ölüm kontrolü çalışıyor..")
             dead_cnt = imagesearch_count_ex("./images/hpbar.png")
@@ -108,9 +110,8 @@ class KoHelper:
             if "Disconnected from server" in text:
                 self.disconnect = True
                 print("DC oldunuz.")
-                self.sendMessage("DC oldunuz. Lütfen karakteri oyuna sokup botu yeniden başlatın.")
             sleep(self.dc_time)
-
+    
     def dc_olan_var_mi(self)->None:
         while not self.disconnect:
             print("Parti dc kontrolü çalışıyor..")
@@ -121,7 +122,7 @@ class KoHelper:
             if warrior_cnt<self.warrior:
                 eksik = self.warrior-warrior_cnt
                 mesaj = f"Partide {eksik} warrior eksik"
-                self.sendMessage(mesaj)
+                self.sendMessage(mesaj)              
             if rogue_cnt<self.rogue:
                 eksik = self.rogue-rogue_cnt
                 mesaj = f"Partide {eksik} rogue eksik"
@@ -137,16 +138,16 @@ class KoHelper:
             sleep(self.parti_dc_time)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     helper = KoHelper()
-    #helper.dc()
     dc_olan_kontrol = threading.Thread(target=helper.dc_olan_var_mi, daemon=True)
     dc_olan_kontrol.start()
-    sleep(2)
+    sleep(1)
     olen_kontrol = threading.Thread(target=helper.olen_var_mi, daemon=True)
     olen_kontrol.start()
-    sleep(2)
+    sleep(1)
     dc_kontrol = threading.Thread(target=helper.dc, daemon=True)
     dc_kontrol.start()
+    sleep(1)
     while True:
         pass
