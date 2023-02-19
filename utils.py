@@ -161,11 +161,12 @@ def LoginKO(username,password):
     while not found_window:
         win32gui.EnumWindows(callback, None)
         time.sleep(3)
+    time.sleep(3)
     login_screen = False
-    while not login_screen:
-        pos = imagesearch("loginscreen.png")
-        if pos[0]!=-1:
-            login_screen = True
+    #while not login_screen:
+    #    pos = imagesearch("loginscreen.png")
+    #    if pos[0]!=-1:
+    #        login_screen = True
     # press username and tab press password and enter
     ret = "--> Giriş yapıldı. OTP için kod bekleniyor.."
     return ret
