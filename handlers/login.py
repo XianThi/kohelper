@@ -1,5 +1,6 @@
 from telebot import types, TeleBot
 import utils
+import time
 
 
 class LoginHandler:
@@ -9,4 +10,7 @@ class LoginHandler:
 
     def _handle(self, message: types.Message) -> None:
         answer = f'Oyuna giriş işlemi başlatılıyor...\n{utils.OpenLauncher()}'
+        self._bot.send_message(message.chat.id,answer)
+        time.sleep(1)
+        answer = utils.LoginKO("test","test")
         self._bot.send_message(message.chat.id,answer)
