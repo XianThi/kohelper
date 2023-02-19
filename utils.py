@@ -7,6 +7,9 @@ import requests
 import pyautogui
 import base64
 import pythoncom
+import subprocess
+
+KO_PATH = "C:\\NTTGame\\KnightOnlineEn\\"
 
 def PC_Name():
     return f'{os.environ["COMPUTERNAME"]} - {os.environ["USERNAME"]}'
@@ -65,3 +68,10 @@ def SS1080():
     screenshot = pyautogui.screenshot()
     screenshot.save(r"./tmp.png")
     return './tmp.png'
+
+def OpenLauncher():
+    if os.path.exists(KO_PATH+"Launcher.exe"):
+        subprocess.call([KO_PATH+"Launcher.exe"])
+        return "Launcher başlatıldı.."
+    else:
+        return "KO_PATH değerini kontrol edin."
