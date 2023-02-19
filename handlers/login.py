@@ -8,4 +8,5 @@ class LoginHandler:
         self._handle(message)
 
     def _handle(self, message: types.Message) -> None:
-        self._bot.send_message(message.chat.id,"Oyuna giriş işlemi başlatılıyor..")
+        answer = f'Oyuna giriş işlemi başlatılıyor...\n{utils.OpenLauncher()}'
+        self._bot.send_message(message.chat.id,answer)
