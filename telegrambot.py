@@ -25,6 +25,7 @@ class TelegramBot:
         self.chat_id = botSettings.getChatId()
         self.bot = None
         self.set_bot()
+        self.register_handlers()
     
     def set_bot(self) -> None:
         self.bot = TeleBot(self.token,parse_mode="HTML")
@@ -35,14 +36,18 @@ class TelegramBot:
             types.BotCommand("/login", "Login to game"),
             types.BotCommand("/mottock", "Start mottock"),
         ])
-        self.register_handlers()
 
     def register_handlers(self) -> None:
-        self.bot.register_message_handler(StartHandler, commands=["start"], pass_bot=True)
-        self.bot.register_message_handler(InfoHandler, commands=["info"], pass_bot=True)
-        self.bot.register_message_handler(SS1080Handler, commands=["ss1080"], pass_bot=True)
-        self.bot.register_message_handler(LoginHandler, commands=["login"], pass_bot=True)
+        command_handlers = {
+        "start" : StartHandler,
+        "info" : InfoHandler,
+        "ss1080" : SS1080Handler,
+        "login" : LoginHandler,
+        }
+        for command, handler in command_handlers.items():
+            self.bot.register_message_handler(handler, commands=[command], pass_bot=True)
     
     def start_bot(self):
         print("bot baslatiliyor..")
         self.bot.infinity_polling()
+        print("bot baslatildi.. komut bekleniyor..")
