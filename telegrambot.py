@@ -7,6 +7,8 @@ from handlers.start import StartHandler
 from handlers.info import InfoHandler
 from handlers.ss1080 import SS1080Handler
 from handlers.login import LoginHandler
+from handlers.otp import OTPHandler
+from utils import ZeroSunucu
 
 class BotSettings:
     
@@ -34,6 +36,7 @@ class TelegramBot:
             types.BotCommand("/info", "Get PC Info"),
             types.BotCommand("/ss1080", "Get 1080p Screenshot"),
             types.BotCommand("/login", "Login to game"),
+            types.BotCommand("/otp", "Enter OTP Code for Login"),
             types.BotCommand("/mottock", "Start mottock"),
         ])
 
@@ -43,10 +46,11 @@ class TelegramBot:
         "info" : InfoHandler,
         "ss1080" : SS1080Handler,
         "login" : LoginHandler,
+        "otp" : OTPHandler,
         }
         for command, handler in command_handlers.items():
             self.bot.register_message_handler(handler, commands=[command], pass_bot=True)
-    
+        self.bot.register_callback_query_handler(ZeroSunucu,func=lambda message:message.data=='ZERO',pass_bot=True)
     def start_bot(self):
         print("bot baslatiliyor..")
         self.bot.infinity_polling()
