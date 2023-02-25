@@ -1,11 +1,13 @@
 from telebot import types, TeleBot
+from telebot.handler_backends import ContinueHandling
 import utils
 
-
-class StartHandler:
+class StopKOHelperHandler:    
     def __init__(self, message: types.Message, bot: TeleBot) -> None:
         self._bot = bot
         self._handle(message)
 
     def _handle(self, message: types.Message) -> None:
-        self._bot.send_message(message.chat.id, "Güncellenecek elbet bir gün",)
+        utils.stop_KOHelper()
+        self._bot.send_message(message.chat.id, "KOHelper durduruldu.",)
+    
