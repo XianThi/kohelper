@@ -18,13 +18,17 @@ import numpy as np
 from python_imagesearch.imagesearch import *
 import win32gui
 import time
-
+from telebot import types
+from handlers.kohelper import KOHelperHandler
+from tinydb import TinyDB,Query
+import signal
 user32 = ctypes.windll.user32
 ScreenSize = user32.GetSystemMetrics(0),user32.GetSystemMetrics(1)
 KO_PATH = "C:\\NTTGame\\KnightOnlineEn\\"
 pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 found_window = False
+partidcms:int = 0
 
 def search_image(image):
         count = imagesearch_count("images/"+image)
@@ -180,3 +184,110 @@ def EnterOTP(otp):
 
 def ZeroSunucu(message,bot):
     print("zero seçildi.")
+
+def extract_arg(arg):
+    return arg.split()[1:]
+
+def gen_markup(btns_arr):
+    markup = types.InlineKeyboardMarkup()
+    markup.row_width = len(btns_arr)
+    for title,data in btns_arr.items():
+        markup.add(types.InlineKeyboardButton(title, callback_data=data))
+    return markup
+
+def PartiDCMS(message,bot):
+    db_func('step',1)
+    ms = int(message.data.split(":")[1])
+    db_func('partidcms',ms)
+    KOHelperHandler.stepone(message.message,bot)
+
+def OlumMS(message,bot):
+    db_func('step',2)    
+    ms = int(message.data.split(":")[1])
+    db_func('olumms',ms)
+    KOHelperHandler.steptwo(message.message,bot)
+
+def DCMS(message,bot):
+    db_func('step',3)    
+    ms = int(message.data.split(":")[1])
+    db_func('dcms',ms)
+    KOHelperHandler.stepthree(message.message,bot)
+
+def Nation(message,bot):
+    db_func('step',4)    
+    nation = int(message.data.split(":")[1])
+    db_func('nation',nation)    
+    KOHelperHandler.stepfour(message.message,bot)
+
+def WarriorCount(message,bot):
+    db_func('step',5)    
+    count = int(message.data.split(":")[1])
+    db_func('wrcount',count)  
+    KOHelperHandler.stepfive(message.message,bot)
+    
+def RogueCount(message,bot):
+    db_func('step',6)    
+    count = int(message.data.split(":")[1])
+    db_func('rgcount',count) 
+    KOHelperHandler.stepsix(message.message,bot)
+    
+def PriestCount(message,bot):
+    db_func('step',7)    
+    count = int(message.data.split(":")[1])
+    db_func('prcount',count) 
+    KOHelperHandler.stepseven(message.message,bot)
+    
+def MageCount(message,bot):
+    db_func('step',8)    
+    count = int(message.data.split(":")[1])
+    db_func('mgcount',count)
+    print("ko helper baslatiliyor.")
+    chat_id = message.message.chat.id
+    token = bot.token
+    start_KOHelper(chat_id,token)
+    KOHelperHandler.bot_started(message.message,bot)
+    
+def start_KOHelper(chat_id,token):    
+    partidcms = getValueFromDB('partidcms')["value"]
+    olumms = getValueFromDB('olumms')["value"]
+    dcms = getValueFromDB('dcms')["value"]
+    nation = getValueFromDB('nation')["value"]
+    wrcount = getValueFromDB('wrcount')["value"]
+    rgcount = getValueFromDB('rgcount')["value"]
+    prcount = getValueFromDB('prcount')["value"]
+    mgcount = getValueFromDB('mgcount')["value"]
+    starter_url = f"python ./kohelper.py --chat_id={chat_id} --token={token} --partidcms={partidcms} --olumms={olumms} --dcms={dcms} --nation={nation} --wrcount={wrcount} --rgcount={rgcount} --prcount={prcount} --mgcount={mgcount}"
+    process = subprocess.Popen(starter_url)
+    db_func('process',process.pid)
+
+def stop_KOHelper():
+    process_id = getValueFromDB('process')["value"]
+    os.kill(process_id, signal.SIGTERM)
+ 
+def db_func(key,val):
+    if os.path.exists('./kohelper.json'):
+        if getValueFromDB(key)!=None:
+            update_value_from_db(key,val)
+        else:
+            insert_to_db(key,val)
+    else:
+        f= open("./kohelper.json","w+")
+        f.write("")
+        f.close()
+        if getValueFromDB(key)!=None:
+            update_value_from_db(key,val)
+        else:
+            insert_to_db(key,val)
+
+def insert_to_db(key,val):
+    db = TinyDB('./kohelper.json')
+    db.insert({'name': key, 'value': val})
+
+def update_value_from_db(key,val):
+    db = TinyDB('./kohelper.json')
+    db.update({'value': val}, Query().name == key)
+
+def getValueFromDB(key):
+    db = TinyDB('./kohelper.json')
+    result = db.get(Query()['name'] == key)
+    return result

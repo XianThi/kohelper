@@ -5,29 +5,75 @@ from time import sleep
 from PIL import ImageGrab
 import ocr
 import threading
-import json 
+import json
+import argparse
 
 class KoHelper:
     def __init__(self):
+        parser = argparse.ArgumentParser(description="Just an example", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        parser.add_argument("--chat_id", help="Telegram Chat ID")
+        parser.add_argument("--token",  help="Bot Token")
+        parser.add_argument("--partidcms",  default=30, type=int, help="parti dc kontrol süresi")
+        parser.add_argument("--olumms",  default=30, type=int, help="ölüm kontrol süresi")
+        parser.add_argument("--dcms",  default=300, type=int, help="ölüm kontrol süresi")
+        parser.add_argument("--nation",  default=2, type=int, help="ırk bilgisi")
+        parser.add_argument("--wrcount",  default=2,type=int, help="Partide kaç warrior var?")
+        parser.add_argument("--rgcount",  default=2,type=int, help="Partide kaç rogue var?")
+        parser.add_argument("--prcount",  default=2,type=int, help="Partide kaç priest var?")
+        parser.add_argument("--mgcount",  default=2,type=int, help="Partide kaç mage var?")
+        args = parser.parse_args()
+        config = vars(args)
+        print(config)
         self.found_window = False
         self.disconnect = False
-        self.chat_id = -864786044
-        self.token = "6071564266:AAHjzBD5Wk3_Ot7AtAg7tcfCrrRpkks59TQ"
         self.api = "https://api.telegram.org/bot"
-        self.getUpdates()
+        #self.getUpdates()
         self.sizes = (0,0,0,0)
-        self.parti_dc_time = self._input("Parti DC kontrol süresi (sn)?\r\n",int)
-        self.olum_time = self._input("Ölüm kontrol süresi (sn)?\r\n",int)
-        self.dc_time = self._input("DC kontrol süresi (sn)?\r\n",int)
-        self.humankarus = self._input("1-Human\r\n2-Karus\r\n",int)
+        if config["partidcms"]!=None:
+            self.parti_dc_time = config["partidcms"]
+        else:
+            self.parti_dc_time = self._input("Parti DC kontrol süresi (sn)?\r\n",int)
+        if config["olumms"]!=None:
+            self.olum_time = config["olumms"]
+        else:
+            self.olum_time = self._input("Ölüm kontrol süresi (sn)?\r\n",int)
+        if config["dcms"]!=None:
+            self.dc_time = config["dcms"]
+        else:
+            self.dc_time = self._input("DC kontrol süresi (sn)?\r\n",int)
+        if config["nation"]!=None:
+            self.humankarus = config["nation"]
+        else:
+            self.humankarus = self._input("1-Human\r\n2-Karus\r\n",int)
+        if config["chat_id"]!=None:
+            self.chat_id = config["chat_id"]
+        else:
+            self.chat_id = -864786044
+        if config["token"]!=None:
+            self.token = config["token"]
+        else:
+            self.token = "6071564266:AAHjzBD5Wk3_Ot7AtAg7tcfCrrRpkks59TQ"
         if self.humankarus == 1 :
             self.tip = "human"
         else:
             self.tip = "karus"
-        self.warrior = self._input("Partide kaç adet warrior var?\r\n",int)
-        self.rogue = self._input("Partide kaç adet rogue var?\r\n",int)
-        self.priest = self._input("Partide kaç adet priest var?\r\n",int)
-        self.mage = self._input("Partide kaç adet mage var?\r\n",int)
+        
+        if config["wrcount"]!=None:
+            self.warrior = config["wrcount"]
+        else:
+            self.warrior = self._input("Partide kaç adet warrior var?\r\n",int)
+        if config["rgcount"]!=None:
+            self.rogue = config["rgcount"]
+        else:
+            self.rogue = self._input("Partide kaç adet rogue var?\r\n",int)
+        if config["prcount"]!=None:
+            self.priest = config["prcount"]
+        else:
+            self.priest = self._input("Partide kaç adet priest var?\r\n",int)
+        if config["mgcount"]!=None:
+            self.mage = config["mgcount"]
+        else:
+            self.mage = self._input("Partide kaç adet mage var?\r\n",int)
         print("\n[!] Oyun penceresi aranıyor..\r\n")
         while not self.found_window:
             print("  pencere bulunamadı tekrar deneniyor..")

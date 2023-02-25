@@ -8,7 +8,10 @@ from handlers.info import InfoHandler
 from handlers.ss1080 import SS1080Handler
 from handlers.login import LoginHandler
 from handlers.otp import OTPHandler
-from utils import ZeroSunucu
+from handlers.kohelper import KOHelperHandler
+from handlers.stopkohelper import StopKOHelperHandler
+from utils import ZeroSunucu,PartiDCMS,OlumMS,DCMS,Nation,WarriorCount,RogueCount,PriestCount,MageCount
+
 
 class BotSettings:
     
@@ -34,6 +37,8 @@ class TelegramBot:
         self.bot.set_my_commands([
             types.BotCommand("/start", "doing nothing"),
             types.BotCommand("/info", "Get PC Info"),
+            types.BotCommand("/kohelper", "Start KOHelper"),
+            types.BotCommand("/stop_kohelper", "Stop KOHelper"),
             types.BotCommand("/ss1080", "Get 1080p Screenshot"),
             types.BotCommand("/login", "Login to game"),
             types.BotCommand("/otp", "Enter OTP Code for Login"),
@@ -47,11 +52,21 @@ class TelegramBot:
         "ss1080" : SS1080Handler,
         "login" : LoginHandler,
         "otp" : OTPHandler,
+        "kohelper":KOHelperHandler,
+        "stop_kohelper": StopKOHelperHandler
         }
         for command, handler in command_handlers.items():
             self.bot.register_message_handler(handler, commands=[command], pass_bot=True)
         self.bot.register_callback_query_handler(ZeroSunucu,func=lambda message:message.data=='ZERO',pass_bot=True)
+        self.bot.register_callback_query_handler(PartiDCMS,func=lambda message:message.data.startswith('partidcms'),pass_bot=True)
+        self.bot.register_callback_query_handler(OlumMS,func=lambda message:message.data.startswith('olumms'),pass_bot=True)
+        self.bot.register_callback_query_handler(DCMS,func=lambda message:message.data.startswith('dcms'),pass_bot=True)
+        self.bot.register_callback_query_handler(Nation,func=lambda message:message.data.startswith('nation'),pass_bot=True)
+        self.bot.register_callback_query_handler(WarriorCount,func=lambda message:message.data.startswith('wrcount'),pass_bot=True)
+        self.bot.register_callback_query_handler(RogueCount,func=lambda message:message.data.startswith('rgcount'),pass_bot=True)
+        self.bot.register_callback_query_handler(PriestCount,func=lambda message:message.data.startswith('prcount'),pass_bot=True)
+        self.bot.register_callback_query_handler(MageCount,func=lambda message:message.data.startswith('mgcount'),pass_bot=True)
+
     def start_bot(self):
         print("bot baslatiliyor..")
         self.bot.infinity_polling()
-        print("bot baslatildi.. komut bekleniyor..")
