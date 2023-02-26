@@ -10,7 +10,10 @@ from handlers.login import LoginHandler
 from handlers.otp import OTPHandler
 from handlers.kohelper import KOHelperHandler
 from handlers.stopkohelper import StopKOHelperHandler
-from utils import ZeroSunucu,PartiDCMS,OlumMS,DCMS,Nation,WarriorCount,RogueCount,PriestCount,MageCount
+from handlers.startup import StartupHandler
+from handlers.restart import RestartHandler
+from handlers.captcha import CaptchaHandler
+from utils import SunucuSecim,AltSunucuSecim,PartiDCMS,OlumMS,DCMS,Nation,WarriorCount,RogueCount,PriestCount,MageCount
 
 
 class BotSettings:
@@ -37,11 +40,14 @@ class TelegramBot:
         self.bot.set_my_commands([
             types.BotCommand("/start", "doing nothing"),
             types.BotCommand("/info", "Get PC Info"),
+            types.BotCommand("/startup", "Launch on windows startup"),
+            types.BotCommand("/restart", "Restart PC"),
             types.BotCommand("/kohelper", "Start KOHelper"),
             types.BotCommand("/stop_kohelper", "Stop KOHelper"),
             types.BotCommand("/ss1080", "Get 1080p Screenshot"),
             types.BotCommand("/login", "Login to game"),
             types.BotCommand("/otp", "Enter OTP Code for Login"),
+            types.BotCommand("/captcha", "Enter OTP Code for Login"),            
             types.BotCommand("/mottock", "Start mottock"),
         ])
 
@@ -49,15 +55,19 @@ class TelegramBot:
         command_handlers = {
         "start" : StartHandler,
         "info" : InfoHandler,
+        "startup" : StartupHandler,
+        "restart" : RestartHandler,
         "ss1080" : SS1080Handler,
         "login" : LoginHandler,
         "otp" : OTPHandler,
+        "captcha" : CaptchaHandler,
         "kohelper":KOHelperHandler,
         "stop_kohelper": StopKOHelperHandler
         }
         for command, handler in command_handlers.items():
             self.bot.register_message_handler(handler, commands=[command], pass_bot=True)
-        self.bot.register_callback_query_handler(ZeroSunucu,func=lambda message:message.data=='ZERO',pass_bot=True)
+        self.bot.register_callback_query_handler(SunucuSecim,func=lambda message:message.data.startswith("server"),pass_bot=True)
+        self.bot.register_callback_query_handler(AltSunucuSecim,func=lambda message:message.data.startswith("altserver"),pass_bot=True)
         self.bot.register_callback_query_handler(PartiDCMS,func=lambda message:message.data.startswith('partidcms'),pass_bot=True)
         self.bot.register_callback_query_handler(OlumMS,func=lambda message:message.data.startswith('olumms'),pass_bot=True)
         self.bot.register_callback_query_handler(DCMS,func=lambda message:message.data.startswith('dcms'),pass_bot=True)

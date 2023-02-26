@@ -10,3 +10,4 @@ wmi
 psutil
 pyautogui
 tinydb
+configparser

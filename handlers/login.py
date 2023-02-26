@@ -12,5 +12,9 @@ class LoginHandler:
         answer = f'Oyuna giriş işlemi başlatılıyor...\n{utils.OpenLauncher()}'
         self._bot.send_message(message.chat.id,answer)
         time.sleep(1)
-        answer = utils.LoginKO("test","test")
+        answer = utils.LoginKO()
         self._bot.send_message(message.chat.id,answer)
+        if 'Sunucu seçiniz' in answer:
+            btns_arr = {'Agartha':'server:agartha','Zero':'server:zero'}
+            markup = utils.gen_markup(btns_arr)
+            self._bot.send_message(message.chat.id,f"<i><b>Sunucu Seçimi:</b></i>\n\n\nLütfen sunucu seçin.", reply_markup=markup,parse_mode='html')

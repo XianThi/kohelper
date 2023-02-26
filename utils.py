@@ -22,14 +22,18 @@ from telebot import types
 from handlers.kohelper import KOHelperHandler
 from tinydb import TinyDB,Query
 import signal
+import configparser
+import random
+
 user32 = ctypes.windll.user32
 ScreenSize = user32.GetSystemMetrics(0),user32.GetSystemMetrics(1)
 KO_PATH = "C:\\NTTGame\\KnightOnlineEn\\"
+OTP_PATH = "C:\\Program Files (x86)\\AnyOTPSetup\\"
 pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'
 
 found_window = False
-partidcms:int = 0
-
+otp_pid=0
+SUNUCU_POS = {'zero':(645,363),'agartha':(645,335)}
 def search_image(image):
         count = imagesearch_count("images/"+image)
         return count
@@ -69,6 +73,14 @@ def left_click(coords: tuple) -> None:
     pydirectinput.mouseDown()
     pydirectinput.mouseUp()
 
+def press(key)->None:
+    pydirectinput.press(key)
+
+def press_and_wait(key,ms)->None:
+    pydirectinput.keyDown(key)
+    time.sleep(ms)
+    pydirectinput.keyUp(key)
+
 def PC_Name():
     return f'{os.environ["COMPUTERNAME"]} - {os.environ["USERNAME"]}'
     
@@ -81,6 +93,16 @@ def Uptime():
     utime = datetime.timedelta(seconds=int(uptime))
     boot = tnow-utime
     return "{}:{}:{}".format(boot.hour, boot.minute, boot.second)
+
+def add_to_startup(file_path=""):
+    if file_path == "":
+        file_path = os.path.dirname(os.path.realpath(__file__))
+    bat_path = r'C:\Users\%s\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup' % os.environ["USERNAME"]
+    with open(bat_path + '\\' + "open.bat", "w+") as bat_file:
+        bat_file.write(r'cd %s && python "%s\bot_kontrol.py"' % (file_path,file_path))
+
+def restart_pc():
+    subprocess.Popen("shutdown -r -t 1")
 
 def today():
     return  datetime.datetime.today().strftime('%Y-%m-%d')
@@ -127,11 +149,15 @@ def SS1080():
     screenshot.save(r"./tmp.png")
     return './tmp.png'
 
-def OpenLauncher():
+def OpenLauncher(error:bool=False):
+    if(error):
+        ret = "--> Giriş başarısız oldu tekrar deneniyor.\r\n"
+    else:
+        ret = ""
     found_window=False
     if os.path.exists(KO_PATH+"Launcher.exe"):
         os.system("start "+KO_PATH+"Launcher.exe")
-        ret = "--> Launcher başlatıldı..\n"
+        ret = ret + "--> Launcher başlatıldı..\n"
         time.sleep(1)
         launcherbar = search_image("launcherbar.png")
         if launcherbar>0:
@@ -157,23 +183,117 @@ def callback(hwnd, extra) -> None:  # pylint: disable=unused-argument
     y_pos = rect[1]
     width = rect[2] - x_pos
     height = rect[3] - y_pos
-    left_click((int(width/2),int(height/2)))
     found_window = True
-        
-def LoginKO(username,password):
+
+def getUsernamePassword():
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    username = config["ACCOUNT"]["username"]
+    password = config["ACCOUNT"]["password"]
+    return {"username":username, "password":password}
+
+def getOTPPassword():
+    config = configparser.ConfigParser()
+    config.read('settings.ini')
+    return config["ACCOUNT"]["otp_pass"]
+
+def LoginKO():
     global found_window
     while not found_window:
         win32gui.EnumWindows(callback, None)
         time.sleep(3)
     time.sleep(3)
     login_screen = False
-    #while not login_screen:
-    #    pos = imagesearch("loginscreen.png")
-    #    if pos[0]!=-1:
-    #        login_screen = True
-    # press username and tab press password and enter
-    ret = "--> Giriş yapıldı. OTP için kod bekleniyor.."
+    while not login_screen:
+        pos = imagesearch("./images/loginscreen.png")
+        if pos[0]!=-1:
+            login_screen = True
+    time.sleep(1)
+    #left_click(300,300)
+    #press("enter")
+    creds = getUsernamePassword()
+    for i in range(0,len(creds["username"])):
+        press(creds["username"][i])
+        time.sleep(random.uniform(0.1, 0.3))
+    press("tab")
+    for i in range(0,len(creds["password"])):
+        press(creds["password"][i])
+        time.sleep(random.uniform(0.1, 0.3))
+    press("enter")
+    #press username and tab press password and enter
+    ret = "--> Giriş yapıldı. OTP için kod bekleniyor..\r\n"
+    text = get_text((530,330,810,350),1,1)
+    while not "correct OTP password" in text:
+        print(text)
+        text = get_text((530,330,810,350),1,1)
+        time.sleep(2)
+    otp_key = OTPFunc()
+    ret = ret + "--> OTP kod alındı : "+otp_key +"\r\n"
+    ret = ret + "--> Giriş yapılıyor..\r\n"
+    #left_click((10,10))
+    time.sleep(2)
+    for i in range(0,len(otp_key)):
+        key = otp_key[i]
+        press(key)
+        time.sleep(random.uniform(0.1, 0.3))
+    press("enter")
+    time.sleep(2)
+    text = get_text((530,310,730,330),1,1)
+    if "OTP Number is incorrect" in text:
+        subprocess.Popen("taskkill /F /IM KnightOnline*")
+        time.sleep(3)
+        ret = ret + "--> Giriş yapılamadı tekrar deneyin. /login"
+    else:
+        press("enter")
+    ret = ret +"--> Giriş yapıldı. Sunucu seçiniz."
     return ret
+
+def OpenOTP():
+    found_window=False
+    if os.path.exists(OTP_PATH+"AnyOTP.exe"):
+        proc = subprocess.Popen(OTP_PATH+"AnyOTP.exe")
+        otp_pid = proc.pid
+        #os.system('start "'+OTP_PATH+'AnyOTP.exe"')
+        ret = "--> AnyOTP başlatıldı..\n"
+        time.sleep(1)
+        return ret
+    else:
+        return "OTP_PATH değerini kontrol edin."
+
+def OTPLogin():
+    password = getOTPPassword()
+    for i in range(0,len(password)):
+        key = password[i]
+        pos = imagesearch("./images/"+key+".png")
+        if pos[0]!=-1:
+            left_click(pos)
+            time.sleep(random.uniform(0.1, 0.3))
+        else:
+            print("otp sifre hatası")
+    pos = imagesearch("./images/otp_confirm.png")
+    if pos[0]!=-1:
+        left_click((pos[0]+2,pos[1]+2))
+    else:
+        print("otp confirm hatası")
+
+def getOTP():
+    ret = 0
+    pos = imagesearch("./images/otp_number_title.png")
+    if pos[0]!=-1:
+        x = pos[0]-100
+        y = pos[1]+30
+        width = x+370
+        height = y+70
+        ret = get_text((x,y,width,height),1,1)
+    else:
+        print("otp number okuma hatası")
+    subprocess.Popen("taskkill /F /IM AnyOTP.exe")
+    return ret
+
+def OTPFunc():
+    OpenOTP()
+    OTPLogin()
+    return getOTP()
 
 def EnterOTP(otp):
     ret = "--> OTP girişi başarılı.\n"
@@ -182,8 +302,57 @@ def EnterOTP(otp):
     ret = ret + "--> Giriş tamamlandı.\n"
     return ret
 
-def ZeroSunucu(message,bot):
-    print("zero seçildi.")
+def SunucuSecim(message,bot):
+    sunucu = message.data.split(":")[1]
+    left_click(SUNUCU_POS[sunucu])
+    btns_arr = {f'{sunucu}1':f'altserver:{sunucu}1',f'{sunucu}2':f'altserver:{sunucu}2',f'{sunucu}3':f'altserver:{sunucu}3',f'{sunucu}4':f'altserver:{sunucu}4',f'{sunucu}5':f'altserver:{sunucu}5',f'{sunucu}6':f'altserver:{sunucu}6'}
+    markup = gen_markup(btns_arr)
+    bot.send_message(message.message.chat.id,f"<i><b>Alt Sunucu Seçimi:</b></i>\n\n\nLütfen alt sunucu seçin.", reply_markup=markup,parse_mode='html')
+
+def AltSunucuSecim(message,bot):
+    text = message.data.split(":")[1]
+    sunucu = text[:-1]
+    altsunucu = int(text[-1:])
+    xmesafe = 190
+    ymesafe = (altsunucu-1)*24
+    x = SUNUCU_POS[sunucu][0]+xmesafe
+    y = SUNUCU_POS[sunucu][1]+ymesafe
+    left_click((x,y))
+    left_click((x,y))
+    time.sleep(2)
+    pos = imagesearch("./images/refreshbtn.png")
+    if pos[0]!=-1:
+        bot.send_message(message.message.chat.id,f"!!! Captcha doğrulaması gerekiyor.\r\nLütfen /ss1080 komutu ile captchaya bakıp /captcha ile cevabı iletin.")
+    else:
+        bot.send_message(message.message.chat.id,f"Sunucuya giriş başarılı.")
+        time.sleep(3)
+        bot.send_message(message.message.chat.id,f"{LoginTamamla()}")
+
+def captcha(message,bot):
+    captcha = extract_arg(message.text)[0]
+    left_click((622,451))
+    for i in range(0,len(captcha)):
+        if captcha[i].isupper():
+            press("capslock")
+        press(captcha[i].lower())
+        if captcha[i].isupper():
+            press("capslock")
+        time.sleep(random.uniform(0.1, 0.3))
+    press("enter")
+    return "Captcha girildi. Sonuç bekleniyor."
+
+def LoginTamamla():
+    pos = imagesearch("./images/startgame_btn.png")
+    while pos[0]==-1:
+        time.sleep(2)
+        pos = imagesearch("./images/startgame_btn.png") 
+    press("enter")
+    time.sleep(5)
+    pos = imagesearch("./images/menu_btn.png")
+    while pos[0]==-1:
+        time.sleep(2)
+        pos = imagesearch("./images/menu_btn.png")
+    return "<b>Giriş tamamlandı.</b>"
 
 def extract_arg(arg):
     return arg.split()[1:]
