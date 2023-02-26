@@ -9,3 +9,4 @@ telebot
 wmi
 psutil
 pyautogui
+tinydb
