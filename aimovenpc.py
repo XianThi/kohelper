@@ -2,10 +2,6 @@ import pyautogui
 import time
 import math
 
-# Hedef koordinatlarını buraya girin
-target_x = 100
-target_y = 200
-
 # Karakterin yönünü hesaplayan fonksiyon
 def calculate_direction(start_x, start_y, target_x, target_y):
     angle = math.atan2(target_y - start_y, target_x - start_x) * 180 / math.pi
@@ -13,58 +9,63 @@ def calculate_direction(start_x, start_y, target_x, target_y):
         angle += 360
     return angle
 
+# press_and_wait fonksiyonunu tanımlayın
+def press_and_wait(key, ms):
+    pyautogui.keyDown(key)
+    time.sleep(ms)
+    pyautogui.keyUp(key)
+
+    
 # Pyautogui'yi varsayılan ayarlarla başlatın
 pyautogui.FAILSAFE = True
 
-# Hedefe ulaşana kadar hareket edin
-while True:
-    # Mevcut koordinatları alın
-    current_x, current_y = getCurrentCoords()
+def move_to_target(target_x, target_y):
+    walk_speed = 2.7
+    rotation_speed = 5.87
 
-    # Karakterin yönünü hesaplayın
-    direction = calculate_direction(current_x, current_y, target_x, target_y)
+    while True:
+        current_x, current_y = getCurrentCoords()
 
-    # Yöne göre karakteri döndürün
-    if direction > 180:
-        pyautogui.press('a')
-    else:
-        pyautogui.press('d')
+        distance = math.sqrt((target_x - current_x)**2 + (target_y - current_y)**2)
+        if distance <= 1:
+            break
 
-    # Adımları 45 derecelik açıya göre hesaplayın
-    steps_x = 7 / math.sqrt(2)
-    steps_y = 7 / math.sqrt(2)
+        direction = calculate_direction(current_x, current_y, target_x, target_y)
 
-    # Hedefe doğru ilerleyin
-    pyautogui.press('w')
-    time.sleep(1)
+        if direction > 180:
+            press_and_wait('a', rotation_speed / 180 * (direction - 180))
+        else:
+            press_and_wait('d', rotation_speed / 180 * direction)
 
-    # Hedefe doğru ilerleyip ilerlemediğimizi kontrol edin
-    new_x, new_y = getCurrentCoords()
-    distance = math.sqrt((new_x - target_x)**2 + (new_y - target_y)**2)
+        steps_x = 7 / math.sqrt(2)
+        steps_y = 7 / math.sqrt(2)
 
-    if distance < 10:
-        break
+        press_and_wait('w', walk_speed * steps_x)
 
-    # Hedefe doğru hareket ederken sapma olursa karakteri yeniden hedefe yöneltin
-    if new_x - current_x > 0 and new_y - current_y > 0:
-        pyautogui.press('d')
-    elif new_x - current_x > 0 and new_y - current_y < 0:
-        pyautogui.press('a')
-    elif new_x - current_x < 0 and new_y - current_y > 0:
-        pyautogui.press('d')
-    elif new_x - current_x < 0 and new_y - current_y < 0:
-        pyautogui.press('a')
+        time.sleep(1)
 
-    # 5 saniye bekleyin ve yeniden hareket etmeye başlayın
-    time.sleep(5)
+        new_x, new_y = getCurrentCoords()
+        new_distance = math.sqrt((target_x - new_x)**2 + (target_y - new_y)**2)
 
-# Hedefin 1 birim yarıçapında durun
-while True:
-    current_x, current_y = getCurrentCoords()
-    distance = math.sqrt((current_x - target_x)**2 + (current_y - target_y)**2)
-    if distance < 1:
-        break
-    time.sleep(1)
+        if new_distance >= distance:
+            continue
 
-# Programı sonlandırın
-print("Hedefe ulaşıldı.")
+        if new_x - current_x > 0 and new_y - current_y > 0:
+            press_and_wait('d', rotation_speed / 180 * (direction - 180))
+        elif new_x - current_x > 0 and new_y - current_y < 0:
+            press_and_wait('a', rotation_speed / 180 * direction)
+        elif new_x - current_x < 0 and new_y - current_y > 0:
+            press_and_wait('d', rotation_speed / 180 * direction)
+        elif new_x - current_x < 0 and new_y - current_y < 0:
+            press_and_wait('a', rotation_speed / 180 * (direction - 180))
+
+        time.sleep(5)
+
+    while True:
+        current_x, current_y = getCurrentCoords()
+        distance = math.sqrt((target_x - current_x)**2 + (target_y - current_y)**2)
+        if distance < 1:
+            break
+        press_and_wait('w', walk_speed)
+
+    print("Hedefe ulaşıldı.")
