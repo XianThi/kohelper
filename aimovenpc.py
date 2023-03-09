@@ -1,52 +1,70 @@
-import math
-import time
 import pyautogui
+import time
+import math
 
-# Karakterin bulunduğu koordinatlar
-x1 = 454
-y1 = 1622
+# Hedef koordinatlarını buraya girin
+target_x = 100
+target_y = 200
 
-# Hedef koordinatlar
-x2 = 605
-y2 = 1649
+# Karakterin yönünü hesaplayan fonksiyon
+def calculate_direction(start_x, start_y, target_x, target_y):
+    angle = math.atan2(target_y - start_y, target_x - start_x) * 180 / math.pi
+    if angle < 0:
+        angle += 360
+    return angle
 
-# İki nokta arasındaki mesafeyi hesapla
-distance = math.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+# Pyautogui'yi varsayılan ayarlarla başlatın
+pyautogui.FAILSAFE = True
 
-# Hedefe doğru yönelmek için gerekli açıyı hesapla
-angle = math.atan2(y2 - y1, x2 - x1)
-angle = math.degrees(angle)
+# Hedefe ulaşana kadar hareket edin
+while True:
+    # Mevcut koordinatları alın
+    current_x, current_y = getCurrentCoords()
 
-# Karakterin şu anki yönünü tutan değişken
-current_angle = 0
+    # Karakterin yönünü hesaplayın
+    direction = calculate_direction(current_x, current_y, target_x, target_y)
 
-# Döndüğü açıyı hesaplamak için geçen süre
-turn_time = 0
-
-# Birim zamanda ilerlenen mesafe
-velocity = 2.7  # birim/saniye
-
-# Hedefe varana kadar döngüyü çalıştır
-while distance > 0:
-
-    # Eğer yön yanlışsa saat yönünde dön
-    if abs(current_angle - angle) > 5:
-        pyautogui.keyDown('d')
-        time.sleep(0.1)
-        pyautogui.keyUp('d')
-        current_angle += 72
-        turn_time += 1
-        if turn_time > 5.87:
-            print("Error: Could not adjust direction.")
-            break
-
-    # Yön doğruysa ilerle
+    # Yöne göre karakteri döndürün
+    if direction > 180:
+        pyautogui.press('a')
     else:
-        pyautogui.keyDown('w')
-        time.sleep(0.1)
-        pyautogui.keyUp('w')
-        distance -= velocity
-        x1 += math.cos(math.radians(current_angle)) * velocity
-        y1 += math.sin(math.radians(current_angle)) * velocity
+        pyautogui.press('d')
 
-print("Distance to destination:", distance)
+    # Adımları 45 derecelik açıya göre hesaplayın
+    steps_x = 7 / math.sqrt(2)
+    steps_y = 7 / math.sqrt(2)
+
+    # Hedefe doğru ilerleyin
+    pyautogui.press('w')
+    time.sleep(1)
+
+    # Hedefe doğru ilerleyip ilerlemediğimizi kontrol edin
+    new_x, new_y = getCurrentCoords()
+    distance = math.sqrt((new_x - target_x)**2 + (new_y - target_y)**2)
+
+    if distance < 10:
+        break
+
+    # Hedefe doğru hareket ederken sapma olursa karakteri yeniden hedefe yöneltin
+    if new_x - current_x > 0 and new_y - current_y > 0:
+        pyautogui.press('d')
+    elif new_x - current_x > 0 and new_y - current_y < 0:
+        pyautogui.press('a')
+    elif new_x - current_x < 0 and new_y - current_y > 0:
+        pyautogui.press('d')
+    elif new_x - current_x < 0 and new_y - current_y < 0:
+        pyautogui.press('a')
+
+    # 5 saniye bekleyin ve yeniden hareket etmeye başlayın
+    time.sleep(5)
+
+# Hedefin 1 birim yarıçapında durun
+while True:
+    current_x, current_y = getCurrentCoords()
+    distance = math.sqrt((current_x - target_x)**2 + (current_y - target_y)**2)
+    if distance < 1:
+        break
+    time.sleep(1)
+
+# Programı sonlandırın
+print("Hedefe ulaşıldı.")
