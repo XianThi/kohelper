@@ -13,7 +13,7 @@ pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tess
 
 ALPHABET_WHITELIST = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 ROUND_WHITELIST = "0123456789-"
-
+COORD_WHITELIST = "0123456789,"
 
 def image_grayscale(image: ImageGrab.Image) -> Any:
     """Converts an image to grayscale so OCR has an easier time deciphering characters"""

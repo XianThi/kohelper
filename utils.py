@@ -440,7 +440,74 @@ def setJob(message):
 def setNick(message):
     nick = message.text.split(" ")[1]
     db_func('nick',nick)
+
+def setPos(message):
+    sira = message.text.split(" ")[1]
+    db_func('ptpos',sira)
+
+def addTP(message):
+    nick = message.text.split(" ")[1]
+    db_func('tplist',nick)
+
+def delTP(message):
+    nick = message.text.split(" ")[1]
+    db_func('tplist',"")
+
+def TP(message):
+    ret = ""
+    sira = message.text.split(" ")[1]
+    val = getValueFromDB('tplist')["value"]
+    if sira == val:
+        genie_pos = imagesearch("./images/knightgenie.png")
+        if (genie_pos[0]!=-1):
+            ret = ret + "Genie durduruluyor.\r\n"
+            x = int(genie_pos[0])+115
+            y = int(genie_pos[1])+9
+            left_click((x,y))
+        pos = imagesearch("./images/ptclose.png")
+        y = pos[1]
+        new_y = (int(sira)-1)*55 + int(y) + 33
+        new_pos = (int(pos[0]) - 17,new_y)
+        left_click(new_pos)
+        left_click(new_pos)
+        press("f3")
+        press("1")
+        time.sleep(2)
+        if (genie_pos[0]!=-1):
+            x = int(genie_pos[0])+88
+            y = int(genie_pos[1])+8
+            left_click((x,y))
+        ret = ret + "TP işlemi tamamlandı. \r\n"
+    else:
+        ret = "error"
+    return ret
+
+def call_tp(bot,channel_id):
+    sira = getValueFromDB("ptpos")
+    bot.send_message(channel_id,f"/tp {sira}")
+
+def RepairAndSell(message,bot):
+    status = message.data.split(":")[1]
+    db_func("repairandsell",status)
+    if status == "active":
+        RepairAndSellHandler.VIPBag(message.message,bot)
+def VIPBag(message,bot):
+    vipbag = message.data.split(":")[1]
+    db_func("vipbag",vipbag)
+    chat_id = message.message.chat.id
+    token = bot.token
+    start_RepairAndSell(chat_id,token,vipbag)
+
+def start_RepairAndSell(chat_id,token,vipbag):    
+    starter_url = f"python ./repairandsell.py --chat_id={chat_id} --token={token} --vipbag={vipbag}"
+    process = subprocess.Popen(starter_url)
+    db_func('rsprocess',process.pid)
+
+def stop_RepairAndSell():
+    process_id = getValueFromDB('rsprocess')["value"]
+    os.kill(process_id, signal.SIGTERM)
  
+
 def db_func(key,val):
     if os.path.exists('./kohelper.json'):
         if getValueFromDB(key)!=None:

@@ -13,9 +13,14 @@ from handlers.stopkohelper import StopKOHelperHandler
 from handlers.startup import StartupHandler
 from handlers.restart import RestartHandler
 from handlers.captcha import CaptchaHandler
+from handlers.repairandsell import RepairAndSellHandler
 from handlers.setnick import SetNickHandler
 from handlers.setjob import SetJobHandler
-from utils import SunucuSecim,AltSunucuSecim,PartiDCMS,OlumMS,DCMS,Nation,WarriorCount,RogueCount,PriestCount,MageCount
+from handlers.setpos import SetPosHandler
+from handlers.tp import TPHandler
+from handlers.addtp import AddTPHandler
+from handlers.deltp import DelTPHandler
+from utils import SunucuSecim,AltSunucuSecim,PartiDCMS,OlumMS,DCMS,Nation,WarriorCount,RogueCount,PriestCount,MageCount,RepairAndSell,VIPBag
 
 
 class BotSettings:
@@ -50,9 +55,14 @@ class TelegramBot:
             types.BotCommand("/login", "Login to game"),
             types.BotCommand("/otp", "Enter OTP Code for Login"),
             types.BotCommand("/captcha", "Enter OTP Code for Login"),            
-            types.BotCommand("/mottock", "Start mottock"),           
+            types.BotCommand("/mottock", "Start mottock"),                   
+            types.BotCommand("/repairandsell", "Active or deactive repair and sell process"),             
             types.BotCommand("/setnick", "Set nick"),           
-            types.BotCommand("/setjob", "Set job"),
+            types.BotCommand("/setjob", "Set job"),            
+            types.BotCommand("/setpos", "Set position of party"),                
+            types.BotCommand("/addtplist", "Add a  character to TP List by pt position"),  
+            types.BotCommand("/deltplist", "Delete a  character to TP List by pt position"),     
+            types.BotCommand("/tp", "TP character from pt by pt position"),
         ])
 
     def register_handlers(self) -> None:
@@ -66,9 +76,14 @@ class TelegramBot:
         "otp" : OTPHandler,
         "captcha" : CaptchaHandler,
         "kohelper":KOHelperHandler,
+        "repairandsell":RepairAndSellHandler,
         "stop_kohelper": StopKOHelperHandler,
         "setnick": SetNickHandler,
         "setjob": SetJobHandler,
+        "setpos": SetPosHandler,
+        "addtplist": AddTPHandler,
+        "deltplist": DelTPHandler,
+        "tp": TPHandler,
         }
         for command, handler in command_handlers.items():
             self.bot.register_message_handler(handler, commands=[command], pass_bot=True)
@@ -82,6 +97,8 @@ class TelegramBot:
         self.bot.register_callback_query_handler(RogueCount,func=lambda message:message.data.startswith('rgcount'),pass_bot=True)
         self.bot.register_callback_query_handler(PriestCount,func=lambda message:message.data.startswith('prcount'),pass_bot=True)
         self.bot.register_callback_query_handler(MageCount,func=lambda message:message.data.startswith('mgcount'),pass_bot=True)
+        self.bot.register_callback_query_handler(RepairAndSell,func=lambda message:message.data.startswith('repairandsell'),pass_bot=True)
+        self.bot.register_callback_query_handler(VIPBag,func=lambda message:message.data.startswith('vipbag'),pass_bot=True)
 
     def start_bot(self):
         print("bot baslatiliyor..")
