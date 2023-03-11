@@ -433,6 +433,14 @@ def stop_KOHelper():
     process_id = getValueFromDB('process')["value"]
     os.kill(process_id, signal.SIGTERM)
  
+def setJob(message):
+    job = message.text.split(" ")[1]
+    db_func('job',job)
+ 
+def setNick(message):
+    nick = message.text.split(" ")[1]
+    db_func('nick',nick)
+ 
 def db_func(key,val):
     if os.path.exists('./kohelper.json'):
         if getValueFromDB(key)!=None:
@@ -440,7 +448,7 @@ def db_func(key,val):
         else:
             insert_to_db(key,val)
     else:
-        f= open("./kohelper.json","w+")
+        f= open("./kohelper.json","a+")
         f.write("")
         f.close()
         if getValueFromDB(key)!=None:
