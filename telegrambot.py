@@ -13,6 +13,8 @@ from handlers.stopkohelper import StopKOHelperHandler
 from handlers.startup import StartupHandler
 from handlers.restart import RestartHandler
 from handlers.captcha import CaptchaHandler
+from handlers.setnick import SetNickHandler
+from handlers.setjob import SetJobHandler
 from utils import SunucuSecim,AltSunucuSecim,PartiDCMS,OlumMS,DCMS,Nation,WarriorCount,RogueCount,PriestCount,MageCount
 
 
@@ -48,7 +50,9 @@ class TelegramBot:
             types.BotCommand("/login", "Login to game"),
             types.BotCommand("/otp", "Enter OTP Code for Login"),
             types.BotCommand("/captcha", "Enter OTP Code for Login"),            
-            types.BotCommand("/mottock", "Start mottock"),
+            types.BotCommand("/mottock", "Start mottock"),           
+            types.BotCommand("/setnick", "Set nick"),           
+            types.BotCommand("/setjob", "Set job"),
         ])
 
     def register_handlers(self) -> None:
@@ -62,7 +66,9 @@ class TelegramBot:
         "otp" : OTPHandler,
         "captcha" : CaptchaHandler,
         "kohelper":KOHelperHandler,
-        "stop_kohelper": StopKOHelperHandler
+        "stop_kohelper": StopKOHelperHandler,
+        "setnick": SetNickHandler,
+        "setjob": SetJobHandler,
         }
         for command, handler in command_handlers.items():
             self.bot.register_message_handler(handler, commands=[command], pass_bot=True)
