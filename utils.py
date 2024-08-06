@@ -682,9 +682,6 @@ class MacroThread(Thread):
         super(MacroThread, self).__init__(*args, **kwargs)
         self._stopper = Event()
         self.count = 0
-        self.heal = 0
-        self.malice = 0
-        self.action = kwargs['args']
     
     def stop(self):
         self._stopper.set()
@@ -719,32 +716,9 @@ class MacroThread(Thread):
         #end = time.perf_counter()
         #print("geçen süre : ", (end-start))
     
-    def xpriestheal(self):
-        self.press("3")
-        time.sleep(1.5)
-        self.press("z")
-        self.press("z")
-        self.press("z")
-        time.sleep(0.1)
-        self.press("8")
-        time.sleep(6)
-        self.press("0")
-    
-    def heal(self):
-        self.press("3")
-    def mana(self):
-        self.press("0")
-    
-    def malice(self):
-        self.press("z")
-        self.press("z")
-        self.press("z")
-        self.press("8")
-    
-    def priestheal(self):
-        threading.Timer(7.9, heal).start()
-        threading.Timer(8, mana).start()
-        threading.Timer(8.9, malice).start()
+    def run(self):
+        while not self.stopped():
+            self.roguebow()
 
 class MinorThread(Thread):
     import time
@@ -765,7 +739,7 @@ class MinorThread(Thread):
     
     def minor_combo(self):
         interception.key_down("ctrl")
-        interception.right_click(clicks=25, interval=0.001)
+        interception.press(key="0", presses=25, interval=0.001)
         interception.key_up("ctrl")
     
     def press(self,key):
